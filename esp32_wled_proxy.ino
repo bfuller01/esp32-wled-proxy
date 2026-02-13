@@ -1,29 +1,50 @@
-// ESP32 WLED Proxy
-
 #include <WiFi.h>
 #include <WebServer.h>
+#include <FS.h>
+#include <SPIFFS.h>
 
-// Update these with your network credentials
-const char* ssid = "YOUR_SSID";
-const char* password = "YOUR_PASSWORD";
+// WiFi credentials
+const char* ssid = "WLED-Proxy";
+const char* password = "proxy1234";
 
-WebServer server(80);
+WebServer server;
 
-void setup() {
-    Serial.begin(115200);
-    WiFi.begin(ssid, password);
-    while (WiFi.status() != WL_CONNECTED) {
-        delay(1000);
-        Serial.println("Connecting to WiFi...");
-    }
-    Serial.println("WiFi connected.");
-    server.on("/", handleRoot);
-    server.begin();
-    Serial.println("HTTP server started.");
+// Function to handle API config
+void handleConfig() {
+    // Handle GET and POST requests for /api/config
+    // (Add your configuration code here)
 }
 
-void handleRoot() {
-    server.send(200, "text/plain", "Hello from ESP32 WLED Proxy!");
+// Function to handle API control
+void handleControl() {
+    // Handle GET and POST requests for /api/control
+    // (Add your control code here)
+}
+
+void setup() {
+    // Start serial communication
+    Serial.begin(115200);
+
+    // Setup SPIFFS
+    if (!SPIFFS.begin(true)) {
+        Serial.println("SPIFFS Mount Failed");
+        return;
+    }
+
+    // Start WiFi Access Point
+    WiFi.softAP(ssid, password);
+    Serial.println("WiFi AP started");
+
+    // Start web server
+    server.on("/api/config", HTTP_GET, handleConfig);
+    server.on("/api/config", HTTP_POST, handleConfig);
+    server.on("/api/control", HTTP_GET, handleControl);
+    server.on("/api/control", HTTP_POST, handleControl);
+    server.begin();
+    Serial.println("Web server started");
+
+    // Start DNS captive portal
+    // (Add your DNS setup code here)
 }
 
 void loop() {

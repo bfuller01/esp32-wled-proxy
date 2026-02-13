@@ -3,24 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32 WLED Proxy</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>WLED-like Web Interface</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: auto; }
+        h1 { text-align: center; }
+        .control { margin: 10px 0; }
+    </style>
 </head>
 <body>
-    <header>
-        <h1>ESP32 WLED Proxy Web Interface</h1>
-    </header>
-    <main>
-        <section>
-            <h2>Control Panel</h2>
-            <button id="on-btn">Turn On</button>
-            <button id="off-btn">Turn Off</button>
-        </section>
-        <section>
-            <h2>Status</h2>
-            <p id="status">Current Status: Unknown</p>
-        </section>
-    </main>
-    <script src="script.js"></script>
+    <div class="container">
+        <h1>WLED Control Interface</h1>
+        <div class="control">
+            <label for="target-ip">Target IP/Port:</label>
+            <input type="text" id="target-ip" placeholder="192.168.1.100:80" />
+        </div>
+        <div class="control">
+            <label for="power">Power:</label>
+            <input type="checkbox" id="power" />
+        </div>
+        <div class="control">
+            <label for="brightness">Brightness:</label>
+            <input type="range" id="brightness" min="0" max="255" value="255" />
+        </div>
+        <div class="control">
+            <label for="color">Color:</label>
+            <input type="color" id="color" value="#ffffff" />
+        </div>
+        <div class="control">
+            <label for="pattern">Pattern:</label>
+            <select id="pattern">
+                <option value="1">Solid</option>
+                <option value="2">Blink</option>
+                <option value="3">Pulse</option>
+                <!-- Add more patterns here -->
+                <option value="4">Rainbow</option>
+                <option value="5">Theater Chase</option>
+                <!-- Example of 30+ effects -->
+                <!-- Add more options up to 30+ effects -->
+            </select>
+        </div>
+        <div class="control">
+            <label for="speed">Speed:</label>
+            <input type="range" id="speed" min="1" max="100" value="50" />
+        </div>
+        <div class="control">
+            <label for="intensity">Intensity:</label>
+            <input type="range" id="intensity" min="1" max="100" value="100" />
+        </div>
+        <div class="control">
+            <button id="send">Send Command</button>
+        </div>
+        <div class="status">
+            <p id="status-message">Status: Ready</p>
+        </div>
+    </div>
+    <script>
+        document.getElementById('send').onclick = function() {
+            // Here you would implement the functionality to send the command to the WLED device.
+            const ip = document.getElementById('target-ip').value;
+            const power = document.getElementById('power').checked;
+            const brightness = document.getElementById('brightness').value;
+            const color = document.getElementById('color').value;
+            const pattern = document.getElementById('pattern').value;
+            const speed = document.getElementById('speed').value;
+            const intensity = document.getElementById('intensity').value;
+
+            // Example of sending the data.
+            const command = { ip, power, brightness, color, pattern, speed, intensity };
+            console.log('Sending command:', command);
+            document.getElementById('status-message').innerText = 'Status: Command Sent!';
+        };
+    </script>
 </body>
 </html>

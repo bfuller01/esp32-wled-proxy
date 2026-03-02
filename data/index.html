@@ -1,35 +1,99 @@
-<script>
-    function validateIP(ip) {
-        const regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|\*)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|\*)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|\*)$/;
-        return regex.test(ip);
-    }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WLED-like Web Interface</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: auto; }
+        h1 { text-align: center; }
+        .control { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WLED Control Interface</h1>
+        <div class="control">
+            <label for="target-ip">Target IP/Port:</label>
+            <input type="text" id="target-ip" placeholder="192.168.1.100:80" />
+        </div>
+        <div class="control">
+            <label for="power">Power:</label>
+            <input type="checkbox" id="power" />
+        </div>
+        <div class="control">
+            <label for="brightness">Brightness:</label>
+            <input type="range" id="brightness" min="0" max="255" value="255" />
+        </div>
+        <div class="control">
+            <label for="color">Color:</label>
+            <input type="color" id="color" value="#ffffff" />
+        </div>
+        <div class="control">
+            <label for="pattern">Pattern:</label>
+            <select id="pattern">
+                <option value="1">Solid</option>
+                <option value="2">Blink</option>
+                <option value="3">Pulse</option>
+                <option value="4">Rainbow</option>
+                <option value="5">Theater Chase</option>
+            </select>
+        </div>
+        <div class="control">
+            <label for="speed">Speed:</label>
+            <input type="range" id="speed" min="1" max="100" value="50" />
+        </div>
+        <div class="control">
+            <label for="intensity">Intensity:</label>
+            <input type="range" id="intensity" min="1" max="100" value="100" />
+        </div>
+        <div class="control">
+            <button id="send">Send Command</button>
+        </div>
+        <div class="status">
+            <p id="status-message">Status: Ready</p>
+        </div>
+    </div>
 
-    function sendPayload(targetIp, power, brightness, color, pattern, speed, intensity) {
-        if (!validateIP(targetIp)) {
-            updateStatusMessage('Invalid IP address', 'error');
-            return;
-        }
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const sendBtn = document.getElementById('send');
+        const statusMsg = document.getElementById('status-message');
 
-        const payload = JSON.stringify({ power, brightness, color, pattern, speed, intensity });
+        sendBtn.addEventListener('click', function () {
+            const ip = document.getElementById('target-ip').value.trim();
+            const power = document.getElementById('power').checked;
+            const brightness = parseInt(document.getElementById('brightness').value, 10);
+            const color = document.getElementById('color').value;
+            const pattern = document.getElementById('pattern').value;
+            const speed = parseInt(document.getElementById('speed').value, 10);
+            const intensity = parseInt(document.getElementById('intensity').value, 10);
 
-        fetch(`http://${targetIp}/api/control`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: payload
-        })
-        .then(response => {
-            if (response.ok) {
-                updateStatusMessage('Success', 'success');
-            } else {
-                updateStatusMessage('Error: ' + response.statusText, 'error');
+            if (!ip) {
+                statusMsg.innerText = 'Status: Please enter a target IP/Port.';
+                return;
             }
-        })
-        .catch(error => { updateStatusMessage('Error: ' + error.message, 'error'); });
-    }
 
-    function updateStatusMessage(message, status) {
-        const statusMessageElement = document.getElementById('status-message');
-        statusMessageElement.textContent = message;
-        statusMessageElement.className = status; // 'success' or 'error'
-    }
-</script>
+            const payload = { power, brightness, color, pattern, speed, intensity };
+
+            fetch(`http://${ip}/api/control`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            })
+            .then((response) => {
+                if (!response.ok) throw new Error('Network/Device Error');
+                return response.json().catch(() => ({}));
+            })
+            .then(() => {
+                statusMsg.innerText = 'Status: Command Sent!';
+            })
+            .catch((err) => {
+                statusMsg.innerText = `Status: Failed to send command (${err.message})`;
+            });
+        });
+    });
+    </script>
+</body>
+</html>
